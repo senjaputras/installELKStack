@@ -102,10 +102,13 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 		echo ""
 		cd /usr/share/elasticsearch
                 echo "====== GENERATING CERTIFICATE FOR FLEET-SERVER ======"
+		echo ""
 		echo "====== SAVE AS ca.zip ! ======"
+		echo ""
 		./bin/elasticsearch-certutil ca --pem; unzip ca.zip
 		echo ""
 		echo "====== NOW, SAVE AS fleet-server.zip ! ======"
+		echo ""
 		./bin/elasticsearch-certutil cert --name fleet-server --ca-cert /usr/share/elasticsearch/ca/ca.crt --ca-key /usr/share/elasticsearch/ca/ca.key --ip $ip_cst --pem; unzip fleet-server.zip
 		echo ""
 		echo "======  CERTIFICATE DIRECTORY IS ON /usr/share/elasticsearch/... ====== "
