@@ -1,6 +1,6 @@
 
 echo "======== ELK STACK SETUP! Credit:PUTRAS  ========"
-echo "========TAKE A NOTE YOU IP ADDRESS FIRST PLEASE ========"
+echo "========TAKE A NOTE YOURS IP ADDRESS FIRST PLEASE ========"
 echo "Y for install, N for UNINSTALL! "
 read inorun
 
