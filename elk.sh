@@ -1,5 +1,6 @@
 
 echo "======== ELK STACK SETUP! Credit:PUTRAS  ========"
+echo "========TAKE A NOTE YOU IP ADDRESS FIRST PLEASE ========"
 echo "Y for install, N for UNINSTALL! "
 read inorun
 
@@ -10,12 +11,23 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 	echo "======== YOUR OS : ${OS} ========="
 	echo ""
 	if [[ $OS  == *"Ubuntu"* ]]
-	        then
+	    then
 		apt-get install unzip
-	        echo ""
+		sudo apt-get install apt-transport-https
+		sudo apt-get update
+		echo "INSTALL ELASTIC-AGENT? Y/N "
+		read agent
+			if [[ $agent == "y" || $agent == "Y" ]]
+				then
+				wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.4.0-amd64.deb
+			fi
+		wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+		echo "deb [signed-by=/usr/share/keyrings/elasticsearch-keyring.gpg] https://artifacts.elastic.co/packages/8.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-8.x.list
+
+	    echo ""
 		echo "====== INSTALLING NEWEST ELK STACK ON Ubuntu OS ======"
 		echo ""
-	        #wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+	        wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
 	        #echo "deb https://artifacts.elastic.co/packages/8.x/apt stable main" > /etc/apt/sources.list.d/elastic-8.x.list
 	        #apt update
 	        #wget "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.2.0-linux-x86_64.tar.gz"
@@ -27,11 +39,14 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 	        #cd elasticsearch-8.2.0-linux-x86_64
 		echo "====== INSTALL AND CONFIGURING ELASTICSEARCH ====="
 		echo ""
+		apt-get update
 	        apt-get install elasticsearch > secinfo
 	        #apt-get install logstash
 	        systemctl daemon-reload; systemctl enable elasticsearch.service
 		es_ip_def=$(cat /etc/elasticsearch/elasticsearch.yml | grep  '#network.host: ')
-		ip_cst=$(ifconfig | grep 'inet.*broadcast' | sed -e 's/.*inet\(.*\)  netmask.*/\1/')
+		#ip_cst=$(ifconfig | grep 'inet.*broadcast' | sed -e 's/.*inet\(.*\)  netmask.*/\1/')
+		echo "INPUT YOUR ELASTICSEARCH & KIBANA IP ADDRESS : "
+		read ip_cst
 		es_port_def=$(cat /etc/elasticsearch/elasticsearch.yml | grep  '#http.port: ')
 		#echo es_ip_def=$(echo "$es_ip_def" | sed 's/192.168.0.1/$es_ip_cst/')
 		mv secinfo /etc/elasticsearch/secinfo
@@ -40,7 +55,7 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 			then
 			echo "IP DEFAULT ON elasticsearch.yml CHANGE TO IP DEVICE"
 			sed -i '56d' elasticsearch.yml
-			sed -i "56 i network\.host\:$ip_cst" elasticsearch.yml
+			sed -i "56 i network\.host\: $ip_cst" elasticsearch.yml
 		fi
 		if [[ $es_port_def == *"http.port: 9200"* ]]
 			then
@@ -67,7 +82,7 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 			#echo "====== server.host USE LOCALHOST ADDRESS! input the KIBANA IP ADDRESS ! ======"
 			#read kb_ip_cst
 			sed -i '15d' kibana.yml
-			sed -i "15 i server\.host\:$ip_cst" kibana.yml
+			sed -i "15 i server\.host\: $ip_cst" kibana.yml
 			#sed -i s/$kb_ip_def/server\.host\: $ip_cst/g" kibana.yml
 		fi
 	        if [[ $kb_port_def != "server.port: "* ]]
@@ -99,6 +114,9 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 		echo "COPY THE TOKEN"
 		echo "AND PASTE BELOW!"; cd /usr/share/kibana/bin
 		./kibana-setup 
+		/usr/share/bin/kibana-encryption-keys generate | grep "encryptionKey:" >> /etc/kibana/kibana.yml
+		service kibana restart
+
 
 	else
 	echo "CentOS"
