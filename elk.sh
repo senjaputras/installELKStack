@@ -117,7 +117,7 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 		echo "COPY THE TOKEN"
 		echo "AND PASTE BELOW!"; cd /usr/share/kibana/bin
 		./kibana-setup 
-		/usr/share/bin/kibana-encryption-keys generate | grep "encryptionKey:" >> /etc/kibana/kibana.yml
+		/usr/share/kibana/bin/kibana-encryption-keys generate | grep "encryptionKey:" >> /etc/kibana/kibana.yml
 		service kibana restart
 
 
