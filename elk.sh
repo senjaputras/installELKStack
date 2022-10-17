@@ -13,7 +13,7 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 	if [[ $OS  == *"Ubuntu"* ]]
 	    then
 		apt-get install unzip
-		sudo apt-get install apt-transport-https
+		sudo apt-get install apt-transport-https net-tools
 		sudo apt-get update
 		echo "INSTALL ELASTIC-AGENT? Y/N "
 		read agent
