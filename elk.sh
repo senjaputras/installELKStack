@@ -97,6 +97,13 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 		./kibana-setup 
 		/usr/share/bin/kibana-encryption-keys generate | grep "encryptionKey:" >> /etc/kibana/kibana.yml
 		service kibana restart
+		echo "INSTALL ELASTIC-AGENT? Y/N "
+		read agent
+			if [[ $agent == "y" || $agent == "Y" ]]
+				then
+				wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.4.0-amd64.deb
+			fi
+		wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
 
 
 	else
