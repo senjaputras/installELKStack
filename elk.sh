@@ -101,7 +101,7 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 		read agent
 			if [[ $agent == "y" || $agent == "Y" ]]
 				then
-				wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-8.4.0-amd64.deb
+				apt-get install elastic-agent
 			fi
 		wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
 
