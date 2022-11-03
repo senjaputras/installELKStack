@@ -1,6 +1,5 @@
-
 echo "======== ELK STACK SETUP! Credit:PUTRAS  ========"
-echo "========TAKE A NOTE YOURS IP ADDRESS FIRST PLEASE ========"
+echo "========TAKE A NOTE YOU IP ADDRESS FIRST PLEASE ========"
 echo "Y for install, N for UNINSTALL! "
 read inorun
 
@@ -13,7 +12,7 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 	if [[ $OS  == *"Ubuntu"* ]]
 	    then
 		apt-get install unzip
-		sudo apt-get install apt-transport-https net-tools
+		sudo apt-get install apt-transport-https
 		sudo apt-get update
 		echo "INSTALL ELASTIC-AGENT? Y/N "
 		read agent
@@ -28,27 +27,15 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 		echo "====== INSTALLING NEWEST ELK STACK ON Ubuntu OS ======"
 		echo ""
 	        wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-	        #echo "deb https://artifacts.elastic.co/packages/8.x/apt stable main" > /etc/apt/sources.list.d/elastic-8.x.list
-	        #apt update
-	        #wget "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-8.2.0-linux-x86_64.tar.gz"
-	        #wget "https://artifacts.elastic.co/downloads/kibana/kibana-8.2.0-linux-x86_64.tar.gz"
-	        #wget "https://artifacts.elastic.co/downloads/logstash/logstash-8.2.0-linux-x86_64.tar.gz"
-	        #tar -xf elasticsearch-8.2.0-linux-x86_64.tar.gz
-	        #tar -xf kibana-8.2.0-linux-x86_64.tar.gz
-	        #tar -xf logstash-8.2.0-linux-x86_64.tar.gz
-	        #cd elasticsearch-8.2.0-linux-x86_64
 		echo "====== INSTALL AND CONFIGURING ELASTICSEARCH ====="
 		echo ""
 		apt-get update
 	        apt-get install elasticsearch > secinfo
-	        #apt-get install logstash
 	        systemctl daemon-reload; systemctl enable elasticsearch.service
 		es_ip_def=$(cat /etc/elasticsearch/elasticsearch.yml | grep  '#network.host: ')
-		#ip_cst=$(ifconfig | grep 'inet.*broadcast' | sed -e 's/.*inet\(.*\)  netmask.*/\1/')
 		echo "INPUT YOUR ELASTICSEARCH & KIBANA IP ADDRESS : "
 		read ip_cst
 		es_port_def=$(cat /etc/elasticsearch/elasticsearch.yml | grep  '#http.port: ')
-		#echo es_ip_def=$(echo "$es_ip_def" | sed 's/192.168.0.1/$es_ip_cst/')
 		mv secinfo /etc/elasticsearch/secinfo
 		cd /etc/elasticsearch/
 		if [[ ! -z "$es_ip_def" ]]
@@ -79,21 +66,15 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 		if [[ $kb_ip_def == *'#server.host: "localhost"'* ]]
 			then
 			echo ""
-			#echo "====== server.host USE LOCALHOST ADDRESS! input the KIBANA IP ADDRESS ! ======"
-			#read kb_ip_cst
 			sed -i '15d' kibana.yml
 			sed -i "15 i server\.host\: $ip_cst" kibana.yml
-			#sed -i s/$kb_ip_def/server\.host\: $ip_cst/g" kibana.yml
 		fi
 	        if [[ $kb_port_def != "server.port: "* ]]
 	                then
 	                echo "====== KIBANA server.port USE DEFAULT PORT, YOU CAN CHANGE TO ANOTHER PORT! CHOOSE CUSTOM PORT ! ====== "
 	                read kb_port_cst
 			kb_port_line=$(awk '/server.port: 5601/{print NR}' kibana.yml)
-	                #echo "KIBANA PORT : ${kb_port_cst}"
-			#sed -i $kb_port_line'd" kibana.yml
 			sed -i "$kb_port_line i server\.port\: $kb_port_cst" kibana.yml
-	                #sed -i s/$kb_port_def/server\.port\: $kb_port_cst/g" kibana.yml
 		else
 			echo "THERE ARE ANY PORT HAS BEEN OPEN"
 	 	fi
@@ -102,10 +83,11 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 		echo ""
 		cd /usr/share/elasticsearch
                 echo "====== GENERATING CERTIFICATE FOR FLEET-SERVER ======"
+		echo "====== SAVE AS ca.zip ! ======"
+		./bin/elasticsearch-certutil ca --pem; unzip ca.zip
 		echo ""
-		./bin/elasticsearch-certutil ca --pem; unzip elastic-stack-ca.zip
-		echo ""
-		./bin/elasticsearch-certutil cert --name certificate-bundle --ca-cert /usr/share/elasticsearch/ca/ca.crt --ca-key /usr/share/elasticsearch/ca/ca.key --ip $ip_cst --pem; unzip certificate-bundle.zip
+		echo "====== NOW, SAVE AS fleet-server.zip ! ======"
+		./bin/elasticsearch-certutil cert --name fleet-server --ca-cert /usr/share/elasticsearch/ca/ca.crt --ca-key /usr/share/elasticsearch/ca/ca.key --ip $ip_cst --pem; unzip fleet-server.zip
 		echo ""
 		echo "======  CERTIFICATE DIRECTORY IS ON /usr/share/elasticsearch/... ====== "
 		echo ""
@@ -113,7 +95,7 @@ if [[ $inorun == "y" || $inorun == "Y" ]]
 		echo "COPY THE TOKEN"
 		echo "AND PASTE BELOW!"; cd /usr/share/kibana/bin
 		./kibana-setup 
-		/usr/share/kibana/bin/kibana-encryption-keys generate | grep "encryptionKey:" >> /etc/kibana/kibana.yml
+		/usr/share/bin/kibana-encryption-keys generate | grep "encryptionKey:" >> /etc/kibana/kibana.yml
 		service kibana restart
 
 
